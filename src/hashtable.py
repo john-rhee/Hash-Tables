@@ -25,6 +25,7 @@ class HashTable:
 
         You may replace the Python hash with DJB2 as a stretch goal.
         '''
+        # returns python hash
         return hash(key)
 
 
@@ -63,9 +64,16 @@ class HashTable:
         if pair is not None:
             # If so, overwrite the key/value and throw a warning
             if pair.key != key:
-                print("Warning: Overwriting value")
-                pair.key = key
-            pair.value = value
+            
+            # BEFORE COLLISION
+            #     print("Warning: Overwriting value")
+            #     pair.key = key
+            # pair.value = value
+
+                new_pair = LinkedPair(key, value)
+                new_pair.next = pair
+                self.storage[index] = new_pair
+
         else:
             # If not, Create a new LinkedPair and place it in the bucket
             self.storage[index] = LinkedPair(key, value)
@@ -78,14 +86,28 @@ class HashTable:
 ​
         Fill this in.
         '''
+        # BEFORE COLLISION
+        # index = self._hash_mod(key)
+        # # Check if a pair exists in the bucket with matching keys
+        # if self.storage[index] is not None and self.storage[index].key == key:
+        #     # If so, remove that pair
+        #     self.storage[index] = None
+        # else:
+        #     # Else print warning
+        #     print("Warning: Key does not exist")
+
         index = self._hash_mod(key)
-        # Check if a pair exists in the bucket with matching keys
-        if self.storage[index] is not None and self.storage[index].key == key:
-            # If so, remove that pair
-            self.storage[index] = None
-        else:
-            # Else print warning
-            print("Warning: Key does not exist")
+        fake_head = LinkedPair("key", "value")
+        head = fake_head
+        fake_head.next = self.storage[index]
+
+        while head.next != None:
+            if head.next.key == key:
+                head.next = head.next.next
+            head = head.next
+        self.storage[index] = fake_head.next
+
+
 
     def retrieve(self, key):
         '''
@@ -95,15 +117,23 @@ class HashTable:
 ​
         Fill this in.
         '''
+        #BEFORE COLLISION
         # Get the index from hashmod
+        # index = self._hash_mod(key)
+        # # Check if a pair exists in the bucket with matching keys
+        # if self.storage[index] is not None and self.storage[index].key == key:
+        #     # If so, return the value
+        #     return self.storage[index].value
+        # else:
+        #     # Else return None
+        #     return None
+
         index = self._hash_mod(key)
-        # Check if a pair exists in the bucket with matching keys
-        if self.storage[index] is not None and self.storage[index].key == key:
-            # If so, return the value
-            return self.storage[index].value
-        else:
-            # Else return None
-            return None
+        head = self.storage[index]
+        while head != None:
+            if head.key == key:
+                return head.value
+            head = head.next
 
     def resize(self):
         '''
@@ -112,8 +142,24 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        #BEFORE COLLISION
+        # old_storage = self.storage
+        # self.capacity = self.capacity * 2
+        # self.storage = [None] * self.capacity
 
+        # for item in old_storage:
+        #     self.insert(item.key, item.value)
+
+        old_storage = self.storage
+        old_capacity = self.capacity
+        self.capacity = old_capacity * 2
+        self.storage = [None] * self.capacity
+        
+        for i in range(old_capacity):
+            head = old_storage[i]
+            while head != None:
+                self.insert(head.key, head.value)
+                head = head.next
 
 
 if __name__ == "__main__":
